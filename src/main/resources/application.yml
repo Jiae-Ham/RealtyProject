@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${common.local-ip}:3306/{DB??}?serverTimezone=UTC
+    username: u
+    password: u
+  web:
+    server:
+      port: 8080
+  main:
+    allow-bean-definition-overriding: false
+  devtools:
+    restart:
+      enabled: false
+      additional-paths: classpath:/
+    livereload:
+      enabled: true
+    thymeleaf:
+      cache: false
+
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    generate-ddl: true
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+common:
+  local-ip: localhost
