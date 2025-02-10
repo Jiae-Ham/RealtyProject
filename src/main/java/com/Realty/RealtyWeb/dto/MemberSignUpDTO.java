@@ -7,10 +7,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MemberDTO {
+public class MemberSignUpDTO {
     private String userId;
+    private String userPw;
     private String userName;
-    private String userEmail;
     private String userPhone;
+    private String userEmail;
     private String userImg;
+
 }

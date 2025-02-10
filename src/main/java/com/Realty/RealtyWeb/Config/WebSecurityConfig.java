@@ -54,10 +54,16 @@ public class WebSecurityConfig{
         }));
             http.csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests((requests) -> requests
-                            .requestMatchers("/member/join").permitAll()
-                            .requestMatchers("/member/login").permitAll() //공개 경로 이따가 적어둬야함.
-                            .requestMatchers("/member/list").permitAll()
+                            .requestMatchers("/api/member/join").permitAll()
+                            .requestMatchers("/api/auth/login").permitAll() //공개 경로 이따가 적어둬야함.
+                            .requestMatchers("/api/auth/token/refresh").permitAll()
+                            .requestMatchers("/api/member/list").permitAll()
+                            .requestMatchers("/api/member/find-password").permitAll()
+
+                            .requestMatchers("/api/member/my-page/**").authenticated()
                             .requestMatchers("/member/update-password").authenticated()
+                            .requestMatchers("/api/member/update").authenticated()
+                            .requestMatchers("/api/member/delete").authenticated()
                             .anyRequest().authenticated() //그 외 요청은 인증 필요
                     )
                     .formLogin(form -> form.disable())

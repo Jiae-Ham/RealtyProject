@@ -1,8 +1,6 @@
 package com.Realty.RealtyWeb.Entity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+
+import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,36 +38,36 @@ public class UserEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList();
+        return Collections.emptyList();  // 현재는 ROLE 없음
     }
 
     @Override
     public String getPassword() {
-        return userPw; // UserDetails의 password 필드와 매핑
+        return userPw;
     }
 
     @Override
     public String getUsername() {
-        return userName; // UserDetails의 username 필드와 매핑
+        return userName;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; // 계정 만료 여부(true로 설정)
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // 계정 잠김 여부 (true로 설정)
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // 자격 증명 만료 여부 (true로 설정)
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return true; // 계정 활성화 여부 (true로 설정)
+        return true;
     }
 }

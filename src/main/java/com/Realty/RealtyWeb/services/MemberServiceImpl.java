@@ -2,6 +2,7 @@ package com.Realty.RealtyWeb.services;
 
 import com.Realty.RealtyWeb.Entity.UserEntity;
 import com.Realty.RealtyWeb.dto.MemberDTO;
+import com.Realty.RealtyWeb.dto.MemberSignUpDTO;
 import com.Realty.RealtyWeb.repository.MemberRepository;
 import com.Realty.RealtyWeb.repository.UserRepository;
 import com.Realty.RealtyWeb.token.JwtToken;
@@ -38,49 +39,62 @@ public class MemberServiceImpl implements MemberService {
 
     //회원가입
     @Override
-    public MemberDTO join(MemberDTO memberDTO) {
-        if (checkId(memberDTO.getUserId())) {
+    public MemberDTO join(MemberSignUpDTO signUpDTO) {
+        if (checkId(signUpDTO.getUserId())) {
             throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
-        }else if (checkName(memberDTO.getUserName())) {
+        }else if (checkName(signUpDTO.getUserName())) {
             throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
         }
 
-        //비밀번호 암호화 후 저장
-        memberDTO.setUserPw(passwordEncoder.encode(memberDTO.getUserPw()));
-        return memberRepository.save(memberDTO);
+        String hashedPw = passwordEncoder.encode(signUpDTO.getUserPw());
+
+        // Entity 변환 후 저장
+        UserEntity userEntity = UserEntity.builder()
+                .userId(signUpDTO.getUserId())
+                .userPw(hashedPw)
+                .userName(signUpDTO.getUserName())
+                .userPhone(signUpDTO.getUserPhone())
+                .userEmail(signUpDTO.getUserEmail())
+                .userImg(signUpDTO.getUserImg())
+                .build();
+
+        memberRepository.save(userEntity);
+
+        //회원가입 후, 클라이언트에 반환할 DTO
+        return new MemberDTO(
+                signUpDTO.getUserId(),
+                signUpDTO.getUserName(),
+                signUpDTO.getUserEmail(),
+                signUpDTO.getUserPhone(),
+                signUpDTO.getUserImg());
     }
 
-    //로그인
-   @Override
-    public JwtToken login(String userId, String userPw) {
-        //DB에서 사용자 정보 조회
-       UserEntity user = userRepository.findByUserId(userId);
-       if (user == null) {
-           throw new UsernameNotFoundException("사용자를 찾을 수 없습니다.");
-       }
-
-       //비밀번호 검증
-       if (!passwordEncoder.matches(userPw, user.getUserPw())) {
-           throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
-       }
-
-       //Spring Security 인증 객체 생성
-       Authentication authentication =
-               new UsernamePasswordAuthenticationToken(userId, userPw, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
-
-       return jwtTokenProvider.generateToken(authentication);
-   }
-
-   //특정 회원 조회
-   @Override
-   public Optional<MemberDTO> findByUserId(String userId) {
-       return memberRepository.findByUserId(userId);
-   }
+    //특정 회원 조회
+    @Override
+    public Optional<MemberDTO> findByUserId(String userId) {
+        return memberRepository.findByUserId(userId)
+                .map(member -> MemberDTO.builder()
+                        .userId(member.getUserId())
+                        .userName(member.getUsername())
+                        .userEmail(member.getUserEmail())
+                        .userPhone(member.getUserPhone())
+                        .userImg(member.getUserImg())
+                        .build());
+    }
 
     //모든 회원 조회
     @Override
     public List<MemberDTO> findByAllMember() {
-        return memberRepository.findAll();
+        return memberRepository.findAll()
+                .stream()
+                .map(member -> MemberDTO.builder()
+                        .userId(member.getUserId())
+                        .userName(member.getUsername())
+                        .userEmail(member.getUserEmail())
+                        .userPhone(member.getUserPhone())
+                        .userImg(member.getUserImg())
+                        .build())
+                .toList(); //Stream -> List
     }
 
 
@@ -112,18 +126,26 @@ public class MemberServiceImpl implements MemberService {
         return memberRepository.findByUserName(userName).isPresent();
     }
 
-    //회원정보 수정
+    // 회원정보 수정
     @Override
     public MemberDTO update(MemberDTO memberDTO) {
-        return memberRepository.findByUserId(memberDTO.getUserId()).map(member -> {
-            member.setUserPw(passwordEncoder.encode(memberDTO.getUserPw()));
-            member.setUserName(memberDTO.getUserName());
-            member.setUserEmail(memberDTO.getUserEmail());
-            member.setUserPhone(memberDTO.getUserPhone());
-            member.setUserImg(memberDTO.getUserImg());
-            return memberRepository.save(member);
-        }).orElseThrow(() -> new IllegalArgumentException("이미 존재하지 않는 회원입니다."));
+        return memberRepository.findByUserId(memberDTO.getUserId()).map(user -> {
+            user.setUserName(memberDTO.getUserName());
+            user.setUserEmail(memberDTO.getUserEmail());
+            user.setUserPhone(memberDTO.getUserPhone());
+            user.setUserImg(memberDTO.getUserImg());
+            UserEntity updatedUser = memberRepository.save(user);
+
+            return MemberDTO.builder()
+                    .userId(updatedUser.getUserId())
+                    .userName(updatedUser.getUsername())
+                    .userEmail(updatedUser.getUserEmail())
+                    .userPhone(updatedUser.getUserPhone())
+                    .userImg(updatedUser.getUserImg())
+                    .build();
+        }).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
     }
+
 
     //비밀번호 변경
     @Override
@@ -143,9 +165,28 @@ public class MemberServiceImpl implements MemberService {
 
     // 비밀번호 찾기
     @Override
-    public MemberDTO findByUser(String username, String userid, String userphone) {
-        return memberRepository.findByUserNameAndUserIdAndUserPhone(username, userid, userphone)
+    public String findPassword(String username, String userid, String userphone) {
+        UserEntity user = memberRepository.findByUserNameAndUserIdAndUserPhone(username, userid, userphone)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        String tempPassword = generateTempPassword();
+
+        //임시 비밀번호 암호화 후 저장
+        user.setUserPw(passwordEncoder.encode(tempPassword));
+        memberRepository.save(user);
+        return tempPassword;
     }
 
+    private String generateTempPassword() {
+        int length = 8;
+        String charPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder tempPassword = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            int index = (int) (charPool.length() * Math.random());
+            tempPassword.append(charPool.charAt(index));
+        }
+
+        return tempPassword.toString();
+    }
 }
