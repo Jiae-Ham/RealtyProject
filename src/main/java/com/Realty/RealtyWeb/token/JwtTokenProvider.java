@@ -24,7 +24,7 @@ public class JwtTokenProvider {
     private final Key key;
     private static final Map<String, String> refreshTokenStorage = new ConcurrentHashMap<>();
 
-    public JwtTokenProvider(@Value("${spring.security.oauth2.resourceserver.jwt.secret}") String secretKey) {
+    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
