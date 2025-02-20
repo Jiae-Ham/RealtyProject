@@ -60,6 +60,8 @@ public class WebSecurityConfig{
                             .requestMatchers("/api/member/list").permitAll()
                             .requestMatchers("/api/member/find-password").permitAll()
 
+                            .requestMatchers("/api/house-board/**").authenticated()
+                            .requestMatchers("/api/house-info/**").authenticated()
                             .requestMatchers("/api/member/my-page/**").authenticated()
                             .requestMatchers("/member/update-password").authenticated()
                             .requestMatchers("/api/member/update").authenticated()
