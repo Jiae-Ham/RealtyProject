@@ -3,16 +3,18 @@ package com.Realty.RealtyWeb.services;
 import com.Realty.RealtyWeb.Entity.HouseBoardEntity;
 import com.Realty.RealtyWeb.Entity.HouseInfoEntity;
 import com.Realty.RealtyWeb.Entity.UserEntity;
-import com.Realty.RealtyWeb.dto.HouseBoardDTO;
-import com.Realty.RealtyWeb.dto.HouseInfoDTO;
+import com.Realty.RealtyWeb.dto.*;
 
-import com.Realty.RealtyWeb.dto.HouseResisterRequestDTO;
 import com.Realty.RealtyWeb.enums.*;
 import com.Realty.RealtyWeb.repository.HouseBoardRepository;
 import com.Realty.RealtyWeb.repository.HouseInfoRepository;
 import com.Realty.RealtyWeb.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -93,18 +95,16 @@ public class HouseBoardServiceImpl implements HouseBoardService {
                });
     }
 
-    // 전체 매물 게시글 조회
+    // ✅ 매물 게시글 목록 조회 (페이징 + 필터 적용)
     @Override
     @Transactional
-    public List<HouseResisterRequestDTO> getAllHouseBoards() {
-        return houseBoardRepository.findAll()
-                .stream()
-                .map(board -> {
-                    HouseInfoEntity houseInfo = houseInfoRepository.findByHouseBoardEntity(board)
-                            .orElseThrow(() -> new IllegalArgumentException("해당 매물 정보가 없습니다."));
-                    return HouseResisterRequestDTO.fromEntity(board, houseInfo);
-                })
-                .collect(Collectors.toList());
+    public Page<HouseBoardSummaryDTO> getAllHouseBoards(HouseBoardFilterDTO filter, Pageable pageable) {
+        Page<HouseBoardEntity> houseBoards = houseBoardRepository.findAllByFilter(filter, pageable);
+        return houseBoards.map(board -> {
+            HouseInfoEntity houseInfo = houseInfoRepository.findByHouseBoardEntity(board)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 매물 정보가 없습니다."));
+            return HouseBoardSummaryDTO.fromEntity(board, houseInfo);
+        });
     }
 
     // 특정 회원이 작성한 매물 게시글 조회

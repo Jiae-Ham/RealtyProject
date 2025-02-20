@@ -37,6 +37,9 @@ public class HouseBoardEntity {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;  // 작성일
 
+    @OneToOne(mappedBy = "houseBoardEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private HouseInfoEntity houseInfo;
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();  // 자동 생성

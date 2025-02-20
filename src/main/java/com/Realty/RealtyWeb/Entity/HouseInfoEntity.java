@@ -20,7 +20,7 @@ public class HouseInfoEntity {
     private Long houseId;  // 매물 ID (자동 증가)
 
     @OneToOne
-    @JoinColumn(name = "pid", nullable = false)
+    @JoinColumn(name = "pid", referencedColumnName = "pid", nullable = false)
     private HouseBoardEntity houseBoardEntity;  // 해당 게시글과 연결
 
     @Column(name = "building_name", nullable = false, length = 255)

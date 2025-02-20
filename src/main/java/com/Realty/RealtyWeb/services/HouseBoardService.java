@@ -1,8 +1,8 @@
 package com.Realty.RealtyWeb.services;
 
-import com.Realty.RealtyWeb.dto.HouseBoardDTO;
-import com.Realty.RealtyWeb.dto.HouseInfoDTO;
-import com.Realty.RealtyWeb.dto.HouseResisterRequestDTO;
+import com.Realty.RealtyWeb.dto.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public interface HouseBoardService {
     Optional<HouseResisterRequestDTO> getHouseBoardById(Long pid);
 
     // 전체 매물 게시글 조회
-    List<HouseResisterRequestDTO> getAllHouseBoards();
+    Page<HouseBoardSummaryDTO> getAllHouseBoards(HouseBoardFilterDTO filter, Pageable pageable);
 
     // 특정 회원이 작성한 매물 게시글 조회
     List<HouseResisterRequestDTO> getHouseBoardsByUsername(String username);
