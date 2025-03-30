@@ -1,7 +1,6 @@
 package com.Realty.RealtyWeb.controller;
 
 import com.Realty.RealtyWeb.dto.MemberSignUpDTO;
-import com.Realty.RealtyWeb.token.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

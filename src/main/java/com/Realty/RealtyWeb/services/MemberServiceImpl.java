@@ -4,6 +4,7 @@ import com.Realty.RealtyWeb.Entity.UserEntity;
 import com.Realty.RealtyWeb.dto.MemberDTO;
 import com.Realty.RealtyWeb.dto.MemberSignUpDTO;
 import com.Realty.RealtyWeb.repository.MemberRepository;
+import com.Realty.RealtyWeb.repository.UserRepository;
 import com.Realty.RealtyWeb.token.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
