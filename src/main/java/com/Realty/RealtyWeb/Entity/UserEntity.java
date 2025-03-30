@@ -48,6 +48,10 @@ public class UserEntity implements UserDetails {
 
     @Override
     public String getUsername() {
+        return userId;
+    }
+
+    public String getDisplayName() {
         return userName;
     }
 

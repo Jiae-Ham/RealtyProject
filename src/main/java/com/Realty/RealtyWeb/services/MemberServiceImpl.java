@@ -20,7 +20,6 @@ import java.util.Optional;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
-    private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -68,7 +67,7 @@ public class MemberServiceImpl implements MemberService {
         return memberRepository.findByUserId(userId)
                 .map(member -> MemberDTO.builder()
                         .userId(member.getUserId())
-                        .userName(member.getUsername())
+                        .userName(member.getDisplayName())
                         .userEmail(member.getUserEmail())
                         .userPhone(member.getUserPhone())
                         .userImg(member.getUserImg())
@@ -82,7 +81,7 @@ public class MemberServiceImpl implements MemberService {
                 .stream()
                 .map(member -> MemberDTO.builder()
                         .userId(member.getUserId())
-                        .userName(member.getUsername())
+                        .userName(member.getDisplayName())
                         .userEmail(member.getUserEmail())
                         .userPhone(member.getUserPhone())
                         .userImg(member.getUserImg())
@@ -99,6 +98,9 @@ public class MemberServiceImpl implements MemberService {
             if (!passwordEncoder.matches(userPw, member.getUserPw())) {
                 throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
             }
+
+            //회원 삭제 전에 토큰 삭제
+            jwtTokenProvider.revokeRefreshToken(userId);
 
             // 회원 탈퇴 (데이터 삭제)
             memberRepository.delete(member);
@@ -131,7 +133,7 @@ public class MemberServiceImpl implements MemberService {
 
             return MemberDTO.builder()
                     .userId(updatedUser.getUserId())
-                    .userName(updatedUser.getUsername())
+                    .userName(updatedUser.getDisplayName())
                     .userEmail(updatedUser.getUserEmail())
                     .userPhone(updatedUser.getUserPhone())
                     .userImg(updatedUser.getUserImg())
