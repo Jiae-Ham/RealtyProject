@@ -1,7 +1,6 @@
 package com.Realty.RealtyWeb.repository;
 
 import com.Realty.RealtyWeb.Entity.UserEntity;
-import com.Realty.RealtyWeb.dto.MemberDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

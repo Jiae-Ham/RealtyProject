@@ -5,20 +5,13 @@ import com.Realty.RealtyWeb.dto.MemberDTO;
 import com.Realty.RealtyWeb.dto.MemberSignUpDTO;
 import com.Realty.RealtyWeb.repository.MemberRepository;
 import com.Realty.RealtyWeb.repository.UserRepository;
-import com.Realty.RealtyWeb.token.JwtToken;
 import com.Realty.RealtyWeb.token.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
