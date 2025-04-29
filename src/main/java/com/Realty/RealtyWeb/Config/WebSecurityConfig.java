@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -60,6 +61,7 @@ public class WebSecurityConfig{
                             .requestMatchers("/api/member/list").permitAll()
                             .requestMatchers("/api/member/find-password").permitAll()
 
+                            .requestMatchers("/api/Realty/chat").authenticated()
                             .requestMatchers("/api/house-board/**").authenticated()
                             .requestMatchers("/api/house-info/**").authenticated()
                             .requestMatchers("/api/member/my-page/**").authenticated()
@@ -69,7 +71,8 @@ public class WebSecurityConfig{
                             .anyRequest().authenticated() //그 외 요청은 인증 필요
                     )
                     .formLogin(form -> form.disable())
-                    .logout(logout -> logout.permitAll());
+                    .logout(logout -> logout.permitAll())
+                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 
     http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(new JwtExceptionFilter(), JwtAuthenticationFilter.class);
