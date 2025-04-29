@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -12,26 +13,41 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider; //Jwt 토큰을 생성하고 유저 정보를 저장하고 토큰를 전송할 수 있습니다
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        // Request Header에서 Jwt 토큰 추출
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+
         String token = resolveToken(request);
+        String uri = request.getRequestURI();
+        log.info("[JwtAuthFilter] 요청 URI: {}", uri);
 
-        // 토큰 유효성 검사 후 인증 처리
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            // 토큰이 유효할 경우 인증 객체 생성
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
-            // SecurityContext에 인증 객체 설정 -> 요청을 처리하는 동안 인증 정보가 유지됨
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        // 🔥 공개 URL은 무조건 통과
+        if (uri.startsWith("/api/member/join") ||
+                uri.startsWith("/api/auth/login") ||
+                uri.startsWith("/api/auth/token/refresh") ||
+                uri.startsWith("/api/member/list") ||
+                uri.startsWith("/api/member/find-password")) {
+            filterChain.doFilter(request, response);
+            return;
         }
-        // Request를 filterChain로 전송 -> 다음 필터로 이동
-        filterChain.doFilter(request, response);
 
-
+        // 이외는 토큰 검증
+        if (token != null && jwtTokenProvider.validateToken(token)) {
+            Authentication authentication = jwtTokenProvider.getAuthentication(token);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.info("[JwtAuthFilter] 인증 객체 설정 완료: {}", authentication.getName());
+            filterChain.doFilter(request, response); // 정상 통과
+        } else {
+            log.warn("[JwtAuthFilter] 유효하지 않은 토큰 또는 토큰 없음");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"error\": \"JWT 토큰이 없거나 유효하지 않습니다.\"}");
+        }
     }
 
     private String resolveToken(HttpServletRequest request) {
