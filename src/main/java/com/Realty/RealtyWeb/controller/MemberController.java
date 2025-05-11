@@ -1,14 +1,17 @@
 package com.Realty.RealtyWeb.controller;
 
 import com.Realty.RealtyWeb.dto.MemberSignUpDTO;
+import com.Realty.RealtyWeb.services.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import com.Realty.RealtyWeb.services.MemberService;
 import com.Realty.RealtyWeb.dto.MemberDTO;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -19,10 +22,16 @@ import java.util.Map;
 public class MemberController {
 
     private final MemberService memberService;
+    private final ImageService imageService;
 
     //회원가입
-    @PostMapping("/join")
-    public ResponseEntity<MemberDTO> join(@RequestBody MemberSignUpDTO signUpDTO) {
+    //multipart 적용
+    @PostMapping(value = "/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<MemberDTO> join(
+            @RequestPart("data") MemberSignUpDTO signUpDTO,
+            @RequestPart(value = "userimg", required = false) MultipartFile userimg) {
+        String imageUrl = imageService.save(userimg); // 이미지 저장 처리
+        signUpDTO.setUserImg(imageUrl);
         MemberDTO member = memberService.join(signUpDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(member);
     }

@@ -6,10 +6,12 @@ import lombok.Getter;
 
 @Getter
 public enum Purpose {
-    주거용("주거용"),
-    상업용("상업용"),
-    오피스("오피스"),
-    기타 ("기타");
+    원룸("원룸"),
+    빌라("빌라"),
+    오피스텔("오피스텔"),
+    아파트("아파트"),
+    상가("상가"),
+    기타("기타");
 
     private final String value;
 

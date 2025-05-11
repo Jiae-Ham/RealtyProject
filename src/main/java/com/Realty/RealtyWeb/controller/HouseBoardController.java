@@ -4,17 +4,20 @@ import com.Realty.RealtyWeb.dto.*;
 import com.Realty.RealtyWeb.enums.Purpose;
 import com.Realty.RealtyWeb.enums.TransactionType;
 import com.Realty.RealtyWeb.services.HouseBoardService;
+import com.Realty.RealtyWeb.services.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,15 +28,17 @@ import java.util.Optional;
 public class HouseBoardController {
 
     private final HouseBoardService houseBoardService;
+    private final ImageService imagesService;
 
     // 매물 게시글 등록 
     /*
       @AuthenticationPrincipal UserDetails userDetails을 이용해서 하면
       유저 디테일에서 현재 로그인한 사용자의 정보를 가져올 수 있음. 
      */
-    @PostMapping("/create")
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<HouseResisterRequestDTO> createHouseBoard(
-            @RequestBody HouseResisterRequestDTO requestDTO,
+            @RequestPart("data") HouseResisterRequestDTO requestDTO,
+            @RequestParam(value = "pimg", required = false) MultipartFile pimg,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         if (requestDTO.getHouseBoardDTO() == null || requestDTO.getHouseInfoDTO() == null) {
@@ -44,15 +49,18 @@ public class HouseBoardController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
+        // 이미지 저장 및 세팅
+        String imageUrl = (pimg != null && !pimg.isEmpty()) ? imagesService.save(pimg) : null;
+        requestDTO.getHouseBoardDTO().setPimg(imageUrl);
+
         HouseResisterRequestDTO responseDTO = houseBoardService.createHouseBoard(
-                userDetails.getUsername(), // userId를 반환
+                userDetails.getUsername(),
                 requestDTO.getHouseBoardDTO(),
                 requestDTO.getHouseInfoDTO()
         );
 
         return ResponseEntity.ok(responseDTO);
     }
-
 
     // 특정 매물 게시글 조회
     @GetMapping("/{pid}")

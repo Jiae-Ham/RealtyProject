@@ -52,6 +52,7 @@ public class HouseBoardServiceImpl implements HouseBoardService {
         // 매물 정보 엔티티 생성
         HouseInfoEntity houseInfo = HouseInfoEntity.builder()
                 .houseBoardEntity(houseBoard)
+                .ownerType(OwnerType.valueOf(houseInfoDTO.getOwnerType()))
                 .buildingName(houseInfoDTO.getBuildingName())
                 .purpose(Purpose.valueOf(houseInfoDTO.getPurpose()))
                 .transactionType(TransactionType.valueOf(houseInfoDTO.getTransactionType()))
