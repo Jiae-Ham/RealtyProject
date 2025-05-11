@@ -6,9 +6,10 @@ import lombok.Getter;
 
 @Getter
 public enum TransactionType {
-    매매("매매"),
+    월세("월세"),
     전세("전세"),
-    월세 ("월세");
+    매매("매매"),
+    단기("단기");
 
     private final String value;
 

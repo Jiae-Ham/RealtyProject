@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class HouseInfoDTO {
     private Long houseId;        // 매물 ID
     private Long pid;            // 게시글 ID
+    private String ownerType; // 집주인, 세입자
     private String buildingName; // 건물 이름
     private String purpose;      // 용도
     private String transactionType; // 거래 유형
@@ -36,6 +37,7 @@ public class HouseInfoDTO {
         return HouseInfoDTO.builder()
                 .houseId(houseInfoEntity.getHouseId())
                 .pid(houseInfoEntity.getHouseBoardEntity().getPid())
+                .ownerType(houseInfoEntity.getOwnerType().name())
                 .buildingName(houseInfoEntity.getBuildingName())
                 .purpose(houseInfoEntity.getPurpose().name())
                 .transactionType(houseInfoEntity.getTransactionType().name())

@@ -23,16 +23,20 @@ public class HouseInfoEntity {
     @JoinColumn(name = "pid", referencedColumnName = "pid", nullable = false)
     private HouseBoardEntity houseBoardEntity;  // 해당 게시글과 연결
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ownership_type", nullable = false)
+    private OwnerType ownerType;  // 집주인, 세입자
+
     @Column(name = "building_name", nullable = false, length = 255)
     private String buildingName;  // 건물 이름
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Purpose purpose;  // 용도 (주거용, 상업용, 오피스, 기타)
+    private Purpose purpose;  // 용도
 
     @Enumerated(EnumType.STRING)
     @Column(name = "transaction_type", nullable = false)
-    private TransactionType transactionType;  // 거래 유형 (매매, 전세, 월세)
+    private TransactionType transactionType;  // 거래 유형
 
     @Column(nullable = false, columnDefinition = "DECIMAL(15,2)")
     private Double price;  // 가격
