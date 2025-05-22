@@ -65,6 +65,10 @@ public class RegisterAnalysisEntity {
 
     @Column(columnDefinition = "DECIMAL(15,2)")
     private BigDecimal price;
+    @Column(name = "rent_prc", columnDefinition = "DECIMAL(7,2)")
+    private BigDecimal rentPrc;
+
+
     @Column(name = "exclusive_area", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal exclusiveArea;
 

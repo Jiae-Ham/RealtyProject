@@ -4,6 +4,8 @@ import com.Realty.RealtyWeb.enums.Purpose;
 import com.Realty.RealtyWeb.enums.TransactionType;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,10 +19,14 @@ public class HouseBoardFilterDTO {
     private Integer maxPrice;            // 최대 가격
     private Integer minExclusiveArea;    // 최소 전용 면적 (m²)
     private Integer maxExclusiveArea;    // 최대 전용 면적 (m²)
+    private Integer minRentPrc; // 월세
+    private Integer maxRentPrc; // 월세
+    private Integer minParkingPerHouseholdCount; // 주차 대수
+/*
     private Integer minFloor;            // 최소 층수
     private Integer maxFloor;            // 최대 층수
     private Integer builtYear;           // 사용 승인일
     private Boolean petAllowed;          // 반려동물 가능 여부
     private Boolean parkingAvailable;    // 주차 가능 여부
-
+*/
 }

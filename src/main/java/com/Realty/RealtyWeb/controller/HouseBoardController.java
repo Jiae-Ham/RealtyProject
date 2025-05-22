@@ -158,13 +158,19 @@ public class HouseBoardController {
             @RequestParam(required = false) String transactionType, // 거래 방식 (Optional)
             @RequestParam(required = false) Integer minPrice,    // 최소 가격
             @RequestParam(required = false) Integer maxPrice,    // 최대 가격
+            @RequestParam(required = false) Integer minRentPrc,    // 최소 월세
+            @RequestParam(required = false) Integer maxRentPrc,    // 최대 월세
             @RequestParam(required = false) Integer minExclusiveArea, // 최소 전용 면적
             @RequestParam(required = false) Integer maxExclusiveArea, // 최대 전용 면적
+            @RequestParam(required = false) Integer minParkingPerHouseholdCount, // 주차 대수
+
+            /*
             @RequestParam(required = false) Integer minFloor,    // 최소 층수
             @RequestParam(required = false) Integer maxFloor,    // 최대 층수
             @RequestParam(required = false) Integer builtYear,   // 사용 승인일
             @RequestParam(required = false) Boolean petAllowed,  // 반려동물 가능 여부
             @RequestParam(required = false) Boolean parkingAvailable, // 주차 가능 여부
+            */
             @RequestParam(defaultValue = "0") int page,         // 페이지 번호 (기본값: 0)
             @RequestParam(defaultValue = "10") int size         // 페이지 크기 (기본값: 10)
     ) {
@@ -173,13 +179,16 @@ public class HouseBoardController {
                 .transactionType(transactionType != null ? TransactionType.valueOf(transactionType) : null)
                 .minPrice(minPrice)
                 .maxPrice(maxPrice)
+                .minRentPrc(minRentPrc)
+                .maxRentPrc(maxRentPrc)
                 .minExclusiveArea(minExclusiveArea)
                 .maxExclusiveArea(maxExclusiveArea)
-                .minFloor(minFloor)
-                .maxFloor(maxFloor)
-                .builtYear(builtYear)
-                .petAllowed(petAllowed)
-                .parkingAvailable(parkingAvailable)
+                .minParkingPerHouseholdCount(minParkingPerHouseholdCount)
+                //.minFloor(minFloor)
+                //.maxFloor(maxFloor)
+                //.builtYear(builtYear)
+                //.petAllowed(petAllowed)
+                //.parkingAvailable(parkingAvailable)
                 .build();
 
         Pageable pageable = PageRequest.of(page, size);

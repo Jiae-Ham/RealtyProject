@@ -30,6 +30,7 @@ public class RegisterAnalysisDTO {
     private Purpose purpose;
     private TransactionType transactionType;
     private BigDecimal price;
+    private BigDecimal rentPrc;
     private BigDecimal exclusiveArea;
 
     private String pdfBase64;
@@ -52,6 +53,7 @@ public class RegisterAnalysisDTO {
                 .purpose(Purpose.valueOf(dto.getPurpose().toString()))
                 .transactionType(TransactionType.valueOf(dto.getTransactionType().toString()))
                 .price(dto.getPrice())
+                .rentPrc(dto.getRentPrc())
                 .exclusiveArea(dto.getExclusiveArea())
                 .pdf_base64(dto.getPdfBase64())
                 .build();
@@ -71,6 +73,7 @@ public class RegisterAnalysisDTO {
                 .purpose(Purpose.valueOf(entity.getPurpose().toString()))
                 .transactionType(TransactionType.valueOf(entity.getTransactionType().toString()))
                 .price(entity.getPrice())
+                .rentPrc(entity.getRentPrc())
                 .exclusiveArea(entity.getExclusiveArea())
                 .pdfBase64(entity.getPdf_base64())
                 .build();

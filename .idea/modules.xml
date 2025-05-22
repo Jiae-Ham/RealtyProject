@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/RealtyWeb.main.iml" filepath="$PROJECT_DIR$/.idea/modules/RealtyWeb.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/RealtyWeb.iml" filepath="$PROJECT_DIR$/.idea/modules/RealtyWeb.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/RealtyWeb.test.iml" filepath="$PROJECT_DIR$/.idea/modules/RealtyWeb.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.Realty.RealtyWeb.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.Realty.RealtyWeb.main.iml" />
     </modules>
   </component>
 </project>

@@ -79,6 +79,20 @@ public class HouseBoardRepositoryImpl implements HouseBoardRepositoryCustom {
             predicates.add(cb.lessThanOrEqualTo(infoJoin.get("exclusiveArea"), filter.getMaxExclusiveArea()));
         }
 
+        // 월세 필터링
+        if (filter.getMinRentPrc() != null) {
+            predicates.add(cb.greaterThanOrEqualTo(infoJoin.get("rentPrc"), filter.getMinRentPrc()));
+        }
+        if (filter.getMaxRentPrc() != null) {
+            predicates.add(cb.lessThanOrEqualTo(infoJoin.get("rentPrc"), filter.getMaxRentPrc()));
+        }
+
+        // 주차 대수 필터링
+        if (filter.getMinParkingPerHouseholdCount() != null) {
+            predicates.add(cb.greaterThanOrEqualTo(infoJoin.get("parkingPerHouseholdCount"), filter.getMinParkingPerHouseholdCount()));
+        }
+
+        /*
         // 층수 필터링
         if (filter.getMinFloor() != null) {
             predicates.add(cb.greaterThanOrEqualTo(infoJoin.get("floor"), filter.getMinFloor()));
@@ -101,7 +115,7 @@ public class HouseBoardRepositoryImpl implements HouseBoardRepositoryCustom {
         if (filter.getParkingAvailable() != null) {
             predicates.add(cb.equal(infoJoin.get("parking"), filter.getParkingAvailable()));
         }
-
+*/
         return predicates.toArray(new Predicate[0]);
     }
 }

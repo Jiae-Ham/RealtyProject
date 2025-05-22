@@ -53,7 +53,7 @@ public class HouseBoardServiceImpl implements HouseBoardService {
         HouseInfoEntity houseInfo = HouseInfoEntity.builder()
                 .houseBoardEntity(houseBoard)
                 .ownerType(OwnerType.valueOf(houseInfoDTO.getOwnerType()))
-                .buildingName(houseInfoDTO.getBuildingName())
+                //.buildingName(houseInfoDTO.getBuildingName())
                 .purpose(Purpose.valueOf(houseInfoDTO.getPurpose()))
                 .transactionType(TransactionType.valueOf(houseInfoDTO.getTransactionType()))
                 .price(houseInfoDTO.getPrice())
@@ -64,13 +64,17 @@ public class HouseBoardServiceImpl implements HouseBoardService {
                 .supplyArea(houseInfoDTO.getSupplyArea())
                 .rooms(houseInfoDTO.getRooms())
                 .bathrooms(houseInfoDTO.getBathrooms())
-                .floor(houseInfoDTO.getFloor())
+                //.floor(houseInfoDTO.getFloor())
                 .direction(Direction.valueOf(houseInfoDTO.getDirection()))
-                .builtYear(houseInfoDTO.getBuiltYear())
-                .loanAvailable(LoanAvailability.valueOf(houseInfoDTO.getLoanAvailable()))
-                .pet(PetAvailability.valueOf(houseInfoDTO.getPet()))
-                .parking(ParkingAvailability.valueOf(houseInfoDTO.getParking()))
+                //.builtYear(houseInfoDTO.getBuiltYear())
+                //.loanAvailable(LoanAvailability.valueOf(houseInfoDTO.getLoanAvailable()))
+                //.pet(PetAvailability.valueOf(houseInfoDTO.getPet()))
+                //.parking(ParkingAvailability.valueOf(houseInfoDTO.getParking()))
                 .houseDetail(houseInfoDTO.getHouseDetail())
+                .rentPrc(houseInfoDTO.getRentPrc())
+                .parkingPerHouseholdCount(houseInfoDTO.getParkingPerHouseholdCount())
+                .longitude(houseInfoDTO.getLongitude())
+                .latitude(houseInfoDTO.getLatitude())
                 .build();
 
         // 매물 정보 저장
@@ -143,7 +147,7 @@ public class HouseBoardServiceImpl implements HouseBoardService {
         HouseInfoEntity houseInfoEntity = houseInfoRepository.findByHouseBoardEntity(houseBoardEntity)
                 .orElseThrow(() -> new IllegalArgumentException("매물 정보가 존재하지 않습니다."));
 
-        houseInfoEntity.setBuildingName(houseInfoDTO.getBuildingName());
+        //houseInfoEntity.setBuildingName(houseInfoDTO.getBuildingName());
         houseInfoEntity.setPurpose(Purpose.valueOf(houseInfoDTO.getPurpose()));
         houseInfoEntity.setTransactionType(TransactionType.valueOf(houseInfoDTO.getTransactionType()));
         houseInfoEntity.setPrice(houseInfoDTO.getPrice());
@@ -154,12 +158,16 @@ public class HouseBoardServiceImpl implements HouseBoardService {
         houseInfoEntity.setSupplyArea(houseInfoDTO.getSupplyArea());
         houseInfoEntity.setRooms(houseInfoDTO.getRooms());
         houseInfoEntity.setBathrooms(houseInfoDTO.getBathrooms());
-        houseInfoEntity.setFloor(houseInfoDTO.getFloor());
+        //houseInfoEntity.setFloor(houseInfoDTO.getFloor());
         houseInfoEntity.setDirection(Direction.valueOf(houseInfoDTO.getDirection()));
-        houseInfoEntity.setBuiltYear(houseInfoDTO.getBuiltYear());
-        houseInfoEntity.setLoanAvailable(LoanAvailability.valueOf(houseInfoDTO.getLoanAvailable()));
-        houseInfoEntity.setPet(PetAvailability.valueOf(houseInfoDTO.getPet()));
-        houseInfoEntity.setParking(ParkingAvailability.valueOf(houseInfoDTO.getParking()));
+        //houseInfoEntity.setBuiltYear(houseInfoDTO.getBuiltYear());
+        //houseInfoEntity.setLoanAvailable(LoanAvailability.valueOf(houseInfoDTO.getLoanAvailable()));
+        //houseInfoEntity.setPet(PetAvailability.valueOf(houseInfoDTO.getPet()));
+        //houseInfoEntity.setParking(ParkingAvailability.valueOf(houseInfoDTO.getParking()));
+        houseInfoEntity.setRentPrc(houseInfoDTO.getRentPrc());
+        houseInfoEntity.setParkingPerHouseholdCount(houseInfoDTO.getParkingPerHouseholdCount());
+        houseInfoEntity.setLongitude(houseInfoDTO.getLongitude());
+        houseInfoEntity.setLatitude(houseInfoDTO.getLatitude());
         houseInfoEntity.setHouseDetail(houseInfoDTO.getHouseDetail());
         houseInfoRepository.save(houseInfoEntity);
 
