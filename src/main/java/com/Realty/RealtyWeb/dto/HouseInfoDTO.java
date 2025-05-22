@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -17,12 +19,12 @@ public class HouseInfoDTO {
     private String buildingName; // 건물 이름
     private String purpose;      // 용도
     private String transactionType; // 거래 유형
-    private Double price;        // 가격
-    private Double maintenanceFee; // 관리비
+    private BigDecimal price;        // 가격
+    private BigDecimal maintenanceFee; // 관리비
     private String address;      // 주소
     private String addressDetail;// 상세 주소
-    private Double exclusiveArea;// 전용 면적
-    private Double supplyArea;   // 공급 면적
+    private BigDecimal exclusiveArea;// 전용 면적
+    private BigDecimal supplyArea;   // 공급 면적
     private Integer rooms;       // 방 개수
     private Integer bathrooms;   // 욕실 개수
     private Integer floor;       // 층수

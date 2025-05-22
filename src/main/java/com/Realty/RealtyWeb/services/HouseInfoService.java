@@ -13,4 +13,7 @@ public interface HouseInfoService {
 
     // 모든 매물 정보 조회
     List<HouseInfoDTO> getAllHouseInfos();
+
+    HouseInfoDTO findAddressByPid(Long pid);
+
 }

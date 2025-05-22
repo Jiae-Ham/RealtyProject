@@ -3,8 +3,9 @@ package com.Realty.RealtyWeb.controller;
 import com.Realty.RealtyWeb.dto.*;
 import com.Realty.RealtyWeb.enums.Purpose;
 import com.Realty.RealtyWeb.enums.TransactionType;
-import com.Realty.RealtyWeb.services.HouseBoardService;
-import com.Realty.RealtyWeb.services.ImageService;
+import com.Realty.RealtyWeb.services.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +20,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +38,71 @@ public class HouseBoardController {
 
     private final HouseBoardService houseBoardService;
     private final ImageService imagesService;
+    private final CodefRegisterService codefRegisterService;
+    private final HouseInfoService houseInfoService;
+    private final RegisterAnalysisService registerAnalysisService;
+
+    @PostMapping("/{pid}/analyze")
+    public ResponseEntity<?> analyzeRegister(
+            @PathVariable Long pid,
+            @RequestBody CodefRequestDTO dto,
+            @AuthenticationPrincipal UserDetails user
+    ) {
+        try {
+            // ① 주소 조회
+            HouseInfoDTO infoDTO = houseInfoService.findAddressByPid(pid);
+
+            // ② Codef 1차 요청
+            JsonNode response = codefRegisterService.requestRegisterFirst(dto, infoDTO.getAddress() + " " + infoDTO.getAddressDetail());
+
+            // ③ 2차 인증이 필요한 경우
+            if (codefRegisterService.isTwoWayRequired(response)) {
+                JsonNode addrList = response.path("data").path("extraInfo").path("resAddrList");
+
+                // ✅ 무조건 첫 번째 주소 사용
+                if (!addrList.isArray() || addrList.size() == 0) {
+                    throw new IllegalArgumentException("유효하지 않은 주소입니다.");
+                }
+
+                String commUniqueNo = addrList.get(0).path("commUniqueNo").asText();
+
+                // ④ Unique 요청 DTO 구성
+                UniqueNoRequestDTO uniqueDto = UniqueNoRequestDTO.builder()
+                        .phoneNo(dto.getPhoneNo())
+                        .password(dto.getPassword())
+                        .uniqueNo(commUniqueNo)
+                        .inquiryType("0")     // 보통 "0"
+                        .issueType("1")         // 보통 "1"
+                        .ePrepayNo(dto.getEPrepayNo())
+                        .ePrepayPass(dto.getEPrepayPass())
+                        .recordStatus("0")
+                        .jointMortgageJeonseYN("0")
+                        .tradingYN("0")
+                        .electronicClosedYN("0")
+                        .selectAddress("0")                     // 자동 선택 핵심
+                        .isIdentityViewYN("0")
+                        .originDataYN("1")
+                        .warningSkipYN("0")
+                        .build();
+
+                // ⑤ 2차 요청 → 최종 분석
+                JsonNode uniqueResponse = codefRegisterService.requestByUnique(uniqueDto);
+                Long id = codefRegisterService.parseFinalResult(uniqueResponse, pid, user.getUsername(), infoDTO);
+                RegisterAnalysisDTO analysisDTO = registerAnalysisService.getByIdAndUser(id, user.getUsername());
+
+                return ResponseEntity.ok(analysisDTO);
+            }
+
+            // ⑥ 2차 인증 불필요 → 바로 분석
+            Long id = codefRegisterService.parseFinalResult(response, pid, user.getUsername(), infoDTO);
+            RegisterAnalysisDTO analysisDTO = registerAnalysisService.getByIdAndUser(id, user.getUsername());
+
+            return ResponseEntity.ok(analysisDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
     // 매물 게시글 등록 
     /*

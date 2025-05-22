@@ -5,6 +5,8 @@ import com.Realty.RealtyWeb.Entity.HouseInfoEntity;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Builder
 public class HouseBoardSummaryDTO {
@@ -13,8 +15,8 @@ public class HouseBoardSummaryDTO {
     private String ptitle;            // 제목
     private String houseType;         // 주택 유형
     private String transactionType;   // 거래 유형
-    private Double price;            // 거래 금액
-    private Double exclusiveArea;    // 전용면적
+    private BigDecimal price;            // 거래 금액
+    private BigDecimal exclusiveArea;    // 전용면적
     private Integer floor;            // 층
     private String address;           // 주소 (위치)
     private Integer views;            // 조회수
