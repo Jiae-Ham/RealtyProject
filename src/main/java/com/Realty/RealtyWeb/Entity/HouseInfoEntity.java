@@ -29,9 +29,6 @@ public class HouseInfoEntity {
     @Column(name = "ownership_type", nullable = false)
     private OwnerType ownerType;  // 집주인, 세입자
 
-    @Column(name = "building_name", nullable = false, length = 255)
-    private String buildingName;  // 건물 이름
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Purpose purpose;  // 용도
@@ -64,28 +61,46 @@ public class HouseInfoEntity {
     @Column
     private Integer bathrooms;  // 욕실 개수
 
-    @Column
-    private Integer floor;  // 층수
-
     @Enumerated(EnumType.STRING)
     @Column
     private Direction direction;  // 방향 (동향, 서향 등)
 
-    @Column(name = "built_year", length = 255)
-    private String builtYear;  // 준공 연도
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "loan_available", length = 10)
-    private LoanAvailability loanAvailable;  // 대출 가능 여부
+    @Column
+    private BigDecimal rentPrc; // 월세
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 10)
-    private PetAvailability pet;  // 반려동물 가능 여부
+    @Column(name = "parking_per_household_count", nullable = false, columnDefinition = "DECIMAL(5,7)")
+    private BigDecimal parkingPerHouseholdCount; // 주차 대수
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 10)
-    private ParkingAvailability parking;  // 주차 가능 여부
+    @Column(name = "latitude", columnDefinition = "DECIMAL(10,6)")
+    private BigDecimal latitude; // 위도
 
+    @Column(name = "longitude", columnDefinition = "DECIMAL(10,6)")
+    private BigDecimal longitude; // 경도
+
+    /*
+
+    @Column
+    private Integer floor;  // 층수
+
+    @Column(name = "building_name", nullable = false, length = 255)
+    private String buildingName;  // 건물 이름
+
+        @Column(name = "built_year", length = 255)
+        private String builtYear;  // 준공 연도
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "loan_available", length = 10)
+        private LoanAvailability loanAvailable;  // 대출 가능 여부
+
+        @Enumerated(EnumType.STRING)
+        @Column(length = 10)
+        private PetAvailability pet;  // 반려동물 가능 여부
+
+        @Enumerated(EnumType.STRING)
+        @Column(length = 10)
+        private ParkingAvailability parking;  // 주차 가능 여부
+    */
     @Column(name = "house_detail", length = 255)
     private String houseDetail;  // 상세 설명
 }

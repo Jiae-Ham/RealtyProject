@@ -255,6 +255,7 @@ public class CodefRegisterServiceImpl implements CodefRegisterService {
                     .purpose(Purpose.valueOf(houseInfo.getPurpose()))
                     .transactionType(TransactionType.valueOf(houseInfo.getTransactionType()))
                     .price(houseInfo.getPrice())
+                    .rentPrc(houseInfo.getRentPrc())
                     .exclusiveArea(houseInfo.getExclusiveArea())
                     .pdfBase64(dataNode.path("resOriGinalData").asText())  // ✅ 수정
                     .riskDetails(r.riskDetails)
