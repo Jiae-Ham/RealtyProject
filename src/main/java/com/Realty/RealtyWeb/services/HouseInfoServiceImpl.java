@@ -33,4 +33,13 @@ public class HouseInfoServiceImpl implements HouseInfoService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public HouseInfoDTO findAddressByPid(Long pid) {
+        return houseBoardRepository.findById(pid)
+                .flatMap(houseBoard -> houseInfoRepository.findByHouseBoardEntity(houseBoard))
+                .map(HouseInfoDTO::fromEntity) // ✅ DTO로 변환
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 pid입니다."));
+    }
+
+
 }

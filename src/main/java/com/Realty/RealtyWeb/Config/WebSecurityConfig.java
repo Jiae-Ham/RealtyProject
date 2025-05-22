@@ -60,7 +60,13 @@ public class WebSecurityConfig{
                             .requestMatchers("/api/auth/token/refresh").permitAll()
                             .requestMatchers("/api/member/list").permitAll()
                             .requestMatchers("/api/member/find-password").permitAll()
+                            .requestMatchers("/api/codef/register").permitAll()
+                            .requestMatchers("/api/codef/register/2way").permitAll()
+                            .requestMatchers("/api/codef/register/auto").permitAll()
+                            .requestMatchers("/api/codef/unique").permitAll()
 
+                            .requestMatchers("/api/analysis/**").authenticated()
+                            .requestMatchers("/api/analysis/**").authenticated()
                             .requestMatchers("/api/Realty/chat").authenticated()
                             .requestMatchers("/api/house-board/**").authenticated()
                             .requestMatchers("/api/house-info/**").authenticated()

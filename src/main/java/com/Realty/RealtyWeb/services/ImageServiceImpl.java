@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Service
 public class ImageServiceImpl implements ImageService {
-    private final String uploadPath = "/home/realty/images/";
+    private final String uploadPath = "C:/realty/upload/images/";
 
 
     @Override

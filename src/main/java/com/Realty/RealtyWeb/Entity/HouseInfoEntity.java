@@ -5,6 +5,8 @@ import com.Realty.RealtyWeb.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "house_info")
 @Getter
@@ -39,10 +41,10 @@ public class HouseInfoEntity {
     private TransactionType transactionType;  // 거래 유형
 
     @Column(nullable = false, columnDefinition = "DECIMAL(15,2)")
-    private Double price;  // 가격
+    private BigDecimal price;  // 가격
 
     @Column(name = "maintenance_fee", nullable = false, columnDefinition = "DECIMAL(10,2)")
-    private Double maintenanceFee;  // 관리비
+    private BigDecimal maintenanceFee;  // 관리비
 
     @Column(nullable = false, length = 255)
     private String address;  // 주소
@@ -51,10 +53,10 @@ public class HouseInfoEntity {
     private String addressDetail;  // 상세 주소
 
     @Column(name = "exclusive_area", nullable = false, columnDefinition = "DECIMAL(10,2)")
-    private Double exclusiveArea;  // 전용 면적 (㎡)
+    private BigDecimal exclusiveArea;  // 전용 면적 (㎡)
 
     @Column(name = "supply_area", nullable = false, columnDefinition = "DECIMAL(10,7)")
-    private Double supplyArea;  // 공급 면적 (㎡)
+    private BigDecimal supplyArea;  // 공급 면적 (㎡)
 
     @Column
     private Integer rooms;  // 방 개수
