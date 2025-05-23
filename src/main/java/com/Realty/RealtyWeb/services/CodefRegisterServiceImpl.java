@@ -46,9 +46,10 @@ public class CodefRegisterServiceImpl implements CodefRegisterService {
     private final EasyCodef codef;
 
 
-    private final HashMap<String, HashMap<String, Object>> twoWayCache = new HashMap<>();
+    // private final HashMap<String, HashMap<String, Object>> twoWayCache = new HashMap<>();
+    // twoWayCache 사실 필요없음
 
-
+    // 이건 2차 인증 걸러내기 용
     @Override
     public JsonNode requestRegisterFirst(CodefRequestDTO dto, String address) throws JsonProcessingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException, InterruptedException {
 
@@ -71,16 +72,17 @@ public class CodefRegisterServiceImpl implements CodefRegisterService {
         }
 
 
-        /* 추가 인증 필요? */
-        if (isTwoWayRequired(node)) {
-            // jti 를 캐시-키로 사용
-            String jti = node.path("data").path("jti").asText();
-            twoWayCache.put(jti, params);   // ← 1차 파라미터 저장
-        }
+//        /* 추가 인증 필요 - 이것도 필요없긴 함 */
+//        if (isTwoWayRequired(node)) {
+//            // jti 를 캐시-키로 사용
+//            String jti = node.path("data").path("jti").asText();
+//            twoWayCache.put(jti, params);   // ← 1차 파라미터 저장
+//        }
         return node;                   // JSON 혹은 binary wrapper
 
     }
 
+    // 얘가 메인
     @Override
     public JsonNode requestByUnique(UniqueNoRequestDTO dto) {
         try {
