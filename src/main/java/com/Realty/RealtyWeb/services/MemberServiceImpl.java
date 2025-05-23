@@ -36,6 +36,8 @@ public class MemberServiceImpl implements MemberService {
             throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
         }else if (checkName(signUpDTO.getUserName())) {
             throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+        }else if (checkEmail(signUpDTO.getUserEmail())) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
 
         String hashedPw = passwordEncoder.encode(signUpDTO.getUserPw());
@@ -47,7 +49,6 @@ public class MemberServiceImpl implements MemberService {
                 .userName(signUpDTO.getUserName())
                 .userPhone(signUpDTO.getUserPhone())
                 .userEmail(signUpDTO.getUserEmail())
-                .userImg(signUpDTO.getUserImg())
                 .build();
 
         memberRepository.save(userEntity);
@@ -57,8 +58,8 @@ public class MemberServiceImpl implements MemberService {
                 signUpDTO.getUserId(),
                 signUpDTO.getUserName(),
                 signUpDTO.getUserEmail(),
-                signUpDTO.getUserPhone(),
-                signUpDTO.getUserImg());
+                signUpDTO.getUserPhone()
+        );
     }
 
     //특정 회원 조회
@@ -70,7 +71,6 @@ public class MemberServiceImpl implements MemberService {
                         .userName(member.getDisplayName())
                         .userEmail(member.getUserEmail())
                         .userPhone(member.getUserPhone())
-                        .userImg(member.getUserImg())
                         .build());
     }
 
@@ -84,7 +84,6 @@ public class MemberServiceImpl implements MemberService {
                         .userName(member.getDisplayName())
                         .userEmail(member.getUserEmail())
                         .userPhone(member.getUserPhone())
-                        .userImg(member.getUserImg())
                         .build())
                 .toList(); //Stream -> List
     }
@@ -128,7 +127,6 @@ public class MemberServiceImpl implements MemberService {
             user.setUserName(memberDTO.getUserName());
             user.setUserEmail(memberDTO.getUserEmail());
             user.setUserPhone(memberDTO.getUserPhone());
-            user.setUserImg(memberDTO.getUserImg());
             UserEntity updatedUser = memberRepository.save(user);
 
             return MemberDTO.builder()
@@ -136,7 +134,6 @@ public class MemberServiceImpl implements MemberService {
                     .userName(updatedUser.getDisplayName())
                     .userEmail(updatedUser.getUserEmail())
                     .userPhone(updatedUser.getUserPhone())
-                    .userImg(updatedUser.getUserImg())
                     .build();
         }).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
     }

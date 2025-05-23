@@ -22,18 +22,19 @@ import java.util.Map;
 public class MemberController {
 
     private final MemberService memberService;
-    private final ImageService imageService;
 
     //회원가입
     //multipart 적용
-    @PostMapping(value = "/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<MemberDTO> join(
-            @RequestPart("data") MemberSignUpDTO signUpDTO,
-            @RequestPart(value = "userimg", required = false) MultipartFile userimg) {
-        String imageUrl = imageService.save(userimg); // 이미지 저장 처리
-        signUpDTO.setUserImg(imageUrl);
-        MemberDTO member = memberService.join(signUpDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(member);
+    @PostMapping(value = "/join")
+    public ResponseEntity<?> join(
+            @RequestBody MemberSignUpDTO signUpDTO) {
+        try {
+            MemberDTO member = memberService.join(signUpDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(member);
+        } catch (IllegalArgumentException e) {
+            // ⚠ 클라이언트가 알 수 있도록 400 에러와 메시지 전달
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
     }
 
     //id 중복체크

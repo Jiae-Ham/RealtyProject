@@ -55,6 +55,18 @@ public class HouseBoardController {
             // ② Codef 1차 요청
             JsonNode response = codefRegisterService.requestRegisterFirst(dto, infoDTO.getAddress() + " " + infoDTO.getAddressDetail());
 
+            // ②-1 예외 코드 확인
+            String resultCode = response.path("result").path("code").asText();
+            if ("CF-13006".equals(resultCode)) {
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body("주소가 정확하지 않거나 철자가 잘못되었습니다.");
+            } else if ("CF-13328".equals(resultCode)) {
+                return ResponseEntity
+                        .status(HttpStatus.PAYMENT_REQUIRED)
+                        .body("선불전자지급수단의 잔액이 부족합니다.");
+            }
+
             // ③ 2차 인증이 필요한 경우
             if (codefRegisterService.isTwoWayRequired(response)) {
                 JsonNode addrList = response.path("data").path("extraInfo").path("resAddrList");
@@ -163,14 +175,6 @@ public class HouseBoardController {
             @RequestParam(required = false) Integer minExclusiveArea, // 최소 전용 면적
             @RequestParam(required = false) Integer maxExclusiveArea, // 최대 전용 면적
             @RequestParam(required = false) Integer minParkingPerHouseholdCount, // 주차 대수
-
-            /*
-            @RequestParam(required = false) Integer minFloor,    // 최소 층수
-            @RequestParam(required = false) Integer maxFloor,    // 최대 층수
-            @RequestParam(required = false) Integer builtYear,   // 사용 승인일
-            @RequestParam(required = false) Boolean petAllowed,  // 반려동물 가능 여부
-            @RequestParam(required = false) Boolean parkingAvailable, // 주차 가능 여부
-            */
             @RequestParam(defaultValue = "0") int page,         // 페이지 번호 (기본값: 0)
             @RequestParam(defaultValue = "10") int size         // 페이지 크기 (기본값: 10)
     ) {
@@ -184,11 +188,6 @@ public class HouseBoardController {
                 .minExclusiveArea(minExclusiveArea)
                 .maxExclusiveArea(maxExclusiveArea)
                 .minParkingPerHouseholdCount(minParkingPerHouseholdCount)
-                //.minFloor(minFloor)
-                //.maxFloor(maxFloor)
-                //.builtYear(builtYear)
-                //.petAllowed(petAllowed)
-                //.parkingAvailable(parkingAvailable)
                 .build();
 
         Pageable pageable = PageRequest.of(page, size);
@@ -201,13 +200,20 @@ public class HouseBoardController {
     아래 방법은 좀 더 수동적인 방법. SecurityContextHolder를 이용해서 
     수동으로 현재 로그인한 사용자의 정보를 가져옴. 컨트롤러보다는 서비스에서 사용하면 될 방법
      */
-    @PutMapping("/update/{pid}")
+    @PutMapping(value = "/update/{pid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<HouseResisterRequestDTO> updateHouseBoard(
             @PathVariable Long pid,
-            @RequestBody HouseResisterRequestDTO requestDTO) {
+            @RequestPart("data") HouseResisterRequestDTO requestDTO,
+            @RequestPart(value = "pimg", required = false) MultipartFile pimg) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userId = authentication.getName(); // 🔹 JWT에서 userId 가져오기
+        String userId = authentication.getName();
+
+        // 🔄 이미지 새로 올렸으면 저장하고 덮어쓰기
+        if (pimg != null && !pimg.isEmpty()) {
+            String imageUrl = imagesService.save(pimg);
+            requestDTO.getHouseBoardDTO().setPimg(imageUrl);
+        }
 
         HouseResisterRequestDTO updatedBoard = houseBoardService.updateHouseBoard(
                 pid,
@@ -218,6 +224,7 @@ public class HouseBoardController {
 
         return ResponseEntity.ok(updatedBoard);
     }
+
 
 
     // 매물 게시글 삭제

@@ -13,6 +13,5 @@ public class MemberSignUpDTO {
     private String userName;
     private String userPhone;
     private String userEmail;
-    private String userImg;
 
 }

@@ -33,9 +33,6 @@ public class UserEntity implements UserDetails {
     @Column(name = "userphone", length = 20, unique = true)
     private String userPhone;
 
-    @Column(name = "userimg", length = 255, unique = true)
-    private String userImg;
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.emptyList();  // 현재는 ROLE 없음

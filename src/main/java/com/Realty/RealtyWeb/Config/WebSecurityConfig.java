@@ -55,6 +55,7 @@ public class WebSecurityConfig{
         }));
             http.csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests((requests) -> requests
+                            .requestMatchers("/images/**").permitAll()
                             .requestMatchers("/api/member/join").permitAll()
                             .requestMatchers("/api/auth/login").permitAll() //공개 경로 이따가 적어둬야함.
                             .requestMatchers("/api/auth/token/refresh").permitAll()
