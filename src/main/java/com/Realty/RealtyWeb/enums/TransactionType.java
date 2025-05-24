@@ -9,7 +9,8 @@ public enum TransactionType {
     월세("월세"),
     전세("전세"),
     매매("매매"),
-    단기("단기");
+    단기("단기"),
+    기타("기타");
 
     private final String value;
 

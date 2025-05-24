@@ -26,6 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final List<String> PUBLIC_PATTERNS = List.of(
             "/api/member/join",
             "/api/auth/login",
+            "/images/**",
             "/api/auth/token/refresh",
             "/api/member/list",
             "/api/member/find-password",

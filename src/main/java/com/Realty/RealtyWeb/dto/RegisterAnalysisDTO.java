@@ -14,6 +14,7 @@ import java.util.List;
 @Data
 @Builder
 public class RegisterAnalysisDTO {
+    private Long id;
     private Long pid;
     private String userid;
 
@@ -37,10 +38,11 @@ public class RegisterAnalysisDTO {
 
     private List<RiskDetail> riskDetails;
 
-    // Entity -> DTO 매핑 정적 메서드
+    // DTO -> 엔티티
 
     public static RegisterAnalysisEntity toEntity(RegisterAnalysisDTO dto) {
         return RegisterAnalysisEntity.builder()
+                .id(dto.getId())
                 .userid(dto.getUserid())
                 .pid(dto.getPid())
                 .owner(dto.getOwner())
@@ -59,8 +61,10 @@ public class RegisterAnalysisDTO {
                 .build();
     }
 
+    // 엔티티 -> DTO
     public static RegisterAnalysisDTO fromEntity(RegisterAnalysisEntity entity) {
         return RegisterAnalysisDTO.builder()
+                .id(entity.getId())
                 .userid(entity.getUserid())
                 .pid(entity.getPid())
                 .owner(entity.getOwner())

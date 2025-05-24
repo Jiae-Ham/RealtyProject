@@ -11,6 +11,7 @@ public enum Purpose {
     오피스텔("오피스텔"),
     아파트("아파트"),
     상가("상가"),
+    단독("단독"),
     기타("기타");
 
     private final String value;

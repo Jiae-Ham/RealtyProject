@@ -83,8 +83,13 @@ public class HouseBoardRepositoryImpl implements HouseBoardRepositoryCustom {
         if (filter.getMinRentPrc() != null) {
             predicates.add(cb.greaterThanOrEqualTo(infoJoin.get("rentPrc"), filter.getMinRentPrc()));
         }
+
         if (filter.getMaxRentPrc() != null) {
             predicates.add(cb.lessThanOrEqualTo(infoJoin.get("rentPrc"), filter.getMaxRentPrc()));
+            if (filter.getMinRentPrc() == null){
+                filter.setMinRentPrc(1);
+                predicates.add(cb.greaterThanOrEqualTo(infoJoin.get("rentPrc"), filter.getMinRentPrc()));
+            }
         }
 
         // 주차 대수 필터링
