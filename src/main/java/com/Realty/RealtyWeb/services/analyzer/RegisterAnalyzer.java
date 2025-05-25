@@ -71,11 +71,15 @@ public class RegisterAnalyzer {
             for (JsonNode entry : item.path("resContentsList")) {
                 for (JsonNode detail : entry.path("resDetailList")) {
                     String content = detail.path("resContents").asText();
-                    Matcher m = Pattern.compile("채권최고액\\s*금?([\\d,]+)원").matcher(content);
-                    if (m.find()) {
-                        BigDecimal extracted = new BigDecimal(m.group(1).replace(",", ""));
-                        System.out.println("      → 채권최고액 탐지됨: " + extracted);
-                        return extracted;
+                    String[] lines = content.split("\\n");
+                    for (String line : lines) {
+                        if (line.trim().startsWith("&") && line.trim().endsWith("&")) continue;
+                        Matcher m = Pattern.compile("채권최고액\\s*금?([\\d,]+)원").matcher(content);
+                        if (m.find()) {
+                            BigDecimal extracted = new BigDecimal(m.group(1).replace(",", ""));
+                            System.out.println("      → 채권최고액 탐지됨: " + extracted);
+                            return extracted;
+                        }
                     }
                 }
             }
@@ -92,12 +96,21 @@ public class RegisterAnalyzer {
             for (JsonNode entry : item.path("resContentsList")) {
                 for (JsonNode detail : entry.path("resDetailList")) {
                     String content = detail.path("resContents").asText();
-                    Optional<RiskKeywordRule> match = RiskKeywordRule.match(content);
-                    match.ifPresent(rule -> {
-                        if (detectedRules.add(rule)) {
-                            System.out.println("      → 키워드 발견: " + rule.name() + " / " + content);
-                        }
-                    });
+                    if (content.contains("말소") || content.contains("취소") || content.contains("해지")) {
+                        continue;
+                    }
+                    String[] lines = content.split("\\n");
+                    for (String line : lines) {
+                        if (line.trim().startsWith("&") && line.trim().endsWith("&")) continue;
+
+                        Optional<RiskKeywordRule> match = RiskKeywordRule.match(content);
+                        match.ifPresent(rule -> {
+                            if (detectedRules.add(rule)) {
+                                System.out.println("      → 키워드 발견: " + rule.name() + " / " + content);
+                            }
+                        });
+                    }
+
                 }
             }
         } catch (Exception e) {

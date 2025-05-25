@@ -55,8 +55,15 @@ public class HouseBoardController {
             // ② Codef 1차 요청
             JsonNode response = codefRegisterService.requestRegisterFirst(dto, infoDTO.getAddress() + " " + infoDTO.getAddressDetail());
 
+
             // ②-1 예외 코드 확인
             String resultCode = response.path("result").path("code").asText();
+            if ("CF-12701".equals(resultCode)) {
+                Thread.sleep(1000);
+                response = codefRegisterService.requestRegisterFirst(dto, infoDTO.getAddress() + " " + infoDTO.getAddressDetail());
+                resultCode = response.path("result").path("code").asText();
+            }
+
             if ("CF-13006".equals(resultCode)) {
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
