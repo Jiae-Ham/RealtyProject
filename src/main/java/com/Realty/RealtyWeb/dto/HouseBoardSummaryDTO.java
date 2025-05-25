@@ -22,6 +22,7 @@ public class HouseBoardSummaryDTO {
     private String address;           // 주소 (위치)
     private Integer views;            // 조회수
     private String writerName;        // 작성자 닉네임
+    private String pimg; // 매물 이미지
 
     public static HouseBoardSummaryDTO fromEntity(HouseBoardEntity board, HouseInfoEntity info) {
         return HouseBoardSummaryDTO.builder()
@@ -36,6 +37,7 @@ public class HouseBoardSummaryDTO {
                 .address(info.getAddress())  // 위치
                 .views(board.getViews())  // 조회수
                 .writerName(board.getWriter().getDisplayName())  // 작성자 닉네임
+                .pimg(board.getPimg())
                 .build();
     }
 
