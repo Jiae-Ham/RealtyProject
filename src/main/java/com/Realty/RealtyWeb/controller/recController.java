@@ -1,6 +1,7 @@
 package com.Realty.RealtyWeb.controller;
 
 
+import com.Realty.RealtyWeb.dto.HouseBoardSummaryDTO;
 import com.Realty.RealtyWeb.dto.RecResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,16 +19,16 @@ public class recController {
 
 
     @GetMapping("/list")
-    public List<RecResponseDTO> crawl(@RequestParam("addrcode") String addrcode, @RequestParam("uid") String uid) {
+    public List<HouseBoardSummaryDTO> crawl(@RequestParam("addrcode") String addrcode, @RequestParam("uid") String uid) {
         WebClient webClient = WebClient.create("http://localhost:3030");
-        List<RecResponseDTO> houseList = webClient.get()
+        List<HouseBoardSummaryDTO> houseList = webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/")
                         .queryParam("addrcode", addrcode)
                         .queryParam("uid", uid)
                         .build())
                 .retrieve()
-                .bodyToFlux(RecResponseDTO.class) // Flux = 여러 개 (JSON 배열)
+                .bodyToFlux(HouseBoardSummaryDTO.class) // Flux = 여러 개 (JSON 배열)
                 .collectList()               // Flux → List
                 .block();                    // 동기식으로 변환
 
