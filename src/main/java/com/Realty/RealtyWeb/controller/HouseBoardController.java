@@ -182,6 +182,7 @@ public class HouseBoardController {
             @RequestParam(required = false) Integer minExclusiveArea, // 최소 전용 면적
             @RequestParam(required = false) Integer maxExclusiveArea, // 최대 전용 면적
             @RequestParam(required = false) Integer minParkingPerHouseholdCount, // 주차 대수
+            @RequestParam(required = false) String addrCode, // 지역 코드
             @RequestParam(defaultValue = "0") int page,         // 페이지 번호 (기본값: 0)
             @RequestParam(defaultValue = "10") int size         // 페이지 크기 (기본값: 10)
     ) {
@@ -195,6 +196,7 @@ public class HouseBoardController {
                 .minExclusiveArea(minExclusiveArea)
                 .maxExclusiveArea(maxExclusiveArea)
                 .minParkingPerHouseholdCount(minParkingPerHouseholdCount)
+                .addrCode(addrCode)
                 .build();
 
         Pageable pageable = PageRequest.of(page, size);

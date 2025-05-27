@@ -58,6 +58,11 @@ public class HouseBoardRepositoryImpl implements HouseBoardRepositoryCustom {
             predicates.add(cb.equal(infoJoin.get("purpose"), filter.getPurpose()));
         }
 
+        // 지역코드
+        if (filter.getAddrCode() != null) {
+            predicates.add(cb.equal(infoJoin.get("addrCode"), filter.getAddrCode()));
+        }
+
         // 거래 방식
         if (filter.getTransactionType() != null) {
             predicates.add(cb.equal(infoJoin.get("transactionType"), filter.getTransactionType()));
