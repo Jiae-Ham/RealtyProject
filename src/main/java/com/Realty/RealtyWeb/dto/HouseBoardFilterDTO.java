@@ -22,6 +22,7 @@ public class HouseBoardFilterDTO {
     private Integer minRentPrc; // 월세
     private Integer maxRentPrc; // 월세
     private Integer minParkingPerHouseholdCount; // 주차 대수
+    private String addrCode; //지역코드
 /*
     private Integer minFloor;            // 최소 층수
     private Integer maxFloor;            // 최대 층수

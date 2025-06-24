@@ -43,19 +43,8 @@ public class RegisterAnalysisEntity {
 
     private Long pid;
 
-    @Enumerated(EnumType.STRING)
-    private RiskLevel risk_level;
-
-    private LocalDateTime issue_date;
-    private String owner;
-    private String risk_keywords;
-    private String main_warnings;
-
-    @Column(name = "max_claim")
-    private BigDecimal max_claim;
-
-    @Column(name = "protected_amount")
-    private BigDecimal protected_amount;
+    @Column(name = "rag_answer", columnDefinition = "TEXT")
+    private String ragAnswer;
 
     @Enumerated(EnumType.STRING)
     private Purpose purpose;

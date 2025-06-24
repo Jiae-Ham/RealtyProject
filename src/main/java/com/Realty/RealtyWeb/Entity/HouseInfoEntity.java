@@ -78,6 +78,13 @@ public class HouseInfoEntity {
     @Column(name = "longitude", columnDefinition = "DECIMAL(10,6)")
     private BigDecimal longitude; // 경도
 
+
+
+    @Column(name = "address_code", length = 30)
+    private String addrCode; // 지역 코드
+
+
+
     /*
 
     @Column
