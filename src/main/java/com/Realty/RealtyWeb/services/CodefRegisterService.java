@@ -26,6 +26,6 @@ public interface CodefRegisterService {
      */
     boolean isTwoWayRequired(JsonNode response);
 
-    Long parseFinalResult(JsonNode response, Long pid, String userid, HouseInfoDTO houseInfo);
+   // Long parseFinalResult(JsonNode response, Long pid, String userid, HouseInfoDTO houseInfo);
 
 }

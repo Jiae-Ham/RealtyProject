@@ -58,6 +58,11 @@ public class HouseBoardRepositoryImpl implements HouseBoardRepositoryCustom {
             predicates.add(cb.equal(infoJoin.get("purpose"), filter.getPurpose()));
         }
 
+        // 지역 코드
+        if (filter.getAddrCode() != null) {
+            predicates.add(cb.equal(infoJoin.get("addrCode"), filter.getAddrCode()));
+        }
+
         // 거래 방식
         if (filter.getTransactionType() != null) {
             predicates.add(cb.equal(infoJoin.get("transactionType"), filter.getTransactionType()));
@@ -86,10 +91,6 @@ public class HouseBoardRepositoryImpl implements HouseBoardRepositoryCustom {
 
         if (filter.getMaxRentPrc() != null) {
             predicates.add(cb.lessThanOrEqualTo(infoJoin.get("rentPrc"), filter.getMaxRentPrc()));
-            if (filter.getMinRentPrc() == null){
-                filter.setMinRentPrc(1);
-                predicates.add(cb.greaterThanOrEqualTo(infoJoin.get("rentPrc"), filter.getMinRentPrc()));
-            }
         }
 
         // 주차 대수 필터링

@@ -173,139 +173,139 @@ public class CodefRegisterServiceImpl implements CodefRegisterService {
         return p;
     }
 
-    @Override
-    public Long parseFinalResult(JsonNode root, Long pid, String userId, HouseInfoDTO houseInfo) {
-
-        System.out.println("▶ 분석 응답 수신 (전체 JSON):\n" + root.toPrettyString());
-
-        try {
-            JsonNode dataNode = root.path("data");  // ✅ 핵심 변경
-// 로그 추가
-            System.out.println("▶ dataNode 구조 확인:");
-            System.out.println(dataNode.toPrettyString());
-
-            System.out.println("▶ dataNode 필드 목록:");
-            dataNode.fieldNames().forEachRemaining(f -> System.out.println(" - " + f));
-
-            // ───── 1. 기본 부동산 정보 추출 ─────
-            System.out.println("▶ 1단계: 기본 필드 추출 시작");
-
-            JsonNode entries = dataNode.path("resRegisterEntriesList");
-            if (entries == null || !entries.isArray() || entries.size() == 0) {
-                throw new IllegalArgumentException("resRegisterEntriesList가 존재하지 않음");
-            }
-
-            JsonNode entry = entries.get(0);
-            String address = entry.path("resRealty").asText();
-            String uniqueNo = entry.path("commUniqueNo").asText();
-            String issueRaw = entry.path("resPublishDate").asText(); // 예: "20250521"
-            String regOffice = entry.path("commCompetentRegistryOffice").asText();
-
-            System.out.println("  ↳ 주소: " + address);
-            System.out.println("  ↳ 고유번호: " + uniqueNo);
-            System.out.println("  ↳ 발급일자(raw): " + issueRaw);
-            System.out.println("  ↳ 등기소: " + regOffice);
-
-// ───── 2. 날짜 파싱 ─────
-            System.out.println("▶ 2단계: 발급일자 파싱");
-            LocalDateTime issueDate;
-
-            if (issueRaw.matches("\\d{8}")) {
-                // "yyyyMMdd" 형식
-                issueDate = LocalDate.parse(issueRaw, DateTimeFormatter.ofPattern("yyyyMMdd")).atStartOfDay();
-            } else if (issueRaw.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}")) {
-                // "yyyy-MM-dd HH:mm:ss" 형식
-                issueDate = LocalDateTime.parse(issueRaw, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            } else {
-                throw new IllegalArgumentException("지원하지 않는 발급일자 형식: " + issueRaw);
-            }
-
-            System.out.println("  ↳ 발급일자 파싱 완료: " + issueDate);
-
-            // ───── 3. 등기 내역 분석 ─────
-            System.out.println("▶ 3단계: 등기 내역 분석 시작");
-            JsonNode hisList = entry.path("resRegistrationHisList");
-            String owner = extractOwnerFromLatestTransfer(hisList);
-            if (hisList == null || !hisList.isArray()) {
-                throw new IllegalArgumentException("resRegistrationHisList가 존재하지 않음");
-            }
-            System.out.println("  ↳ 등록 내역 수: " + hisList.size());
-
-            RegisterAnalyzer.Result r = RegisterAnalyzer.analyze(hisList, address);
-            System.out.println("  ↳ 분석 완료 - 위험도: " + r.overallRisk);
-            System.out.println("  ↳ 최대 채권액: " + r.maxClaim);
-            System.out.println("  ↳ 보호 금액: " + r.protectedAmount);
-
-            // ───── 4. DB 저장용 DTO 생성 및 저장 ─────
-            System.out.println("▶ 4단계: RegisterAnalysisDTO 생성 및 저장");
-            RegisterAnalysisDTO analysisDto = RegisterAnalysisDTO.builder()
-                    .pid(pid)
-                    .owner(owner)
-                    .userid(userId)
-                    .issueDate(issueDate)
-                    .riskLevel(r.overallRisk)
-                    .riskKeywords(
-                            r.riskDetails.stream().map(RiskDetail::getKeyword)
-                                    .collect(Collectors.joining(", ")))
-                    .mainWarnings(
-                            r.riskDetails.stream()
-                                    .map(d -> d.getTitle() + " - " + d.getDescription())  // ✅ 제목 + 설명 결합
-                                    .collect(Collectors.joining(" / "))
-                    )
-                    .maxClaim(r.maxClaim)
-                    .protectedAmount(r.protectedAmount)
-                    .purpose(Purpose.valueOf(houseInfo.getPurpose()))
-                    .transactionType(TransactionType.valueOf(houseInfo.getTransactionType()))
-                    .price(houseInfo.getPrice())
-                    .rentPrc(houseInfo.getRentPrc())
-                    .exclusiveArea(houseInfo.getExclusiveArea())
-                    .pdfBase64(dataNode.path("resOriGinalData").asText())  // ✅ 수정
-                    .riskDetails(r.riskDetails)
-                    .build();
-
-
-            System.out.println("  ↳ DB 저장 완료");
-
-            // ───── 5. 클라이언트 응답 DTO 구성 ─────
-            System.out.println("▶ 5단계: 응답 DTO 구성 시작");
-
-            CodefResponseDTO.PropertyBasicInfo info = CodefResponseDTO.PropertyBasicInfo.builder()
-                    .resRealty(address)
-                    .resUserNm(owner)
-                    .commUniqueNo(uniqueNo)
-                    .resPublishDate(issueRaw)
-                    .commCompetentRegistryOffice(regOffice)
-                    .build();
-
-            List<CodefResponseDTO.RiskDetail> detailDtos = r.riskDetails.stream()
-                    .map(d -> CodefResponseDTO.RiskDetail.builder()
-                            .category(d.getTitle())
-                            .level(d.getLevel())
-                            .description(d.getDescription())
-                            .build())
-                    .toList();
-
-            CodefResponseDTO.RiskReport report = CodefResponseDTO.RiskReport.builder()
-                    .overallRisk(r.overallRisk)
-                    .risks(detailDtos)
-                    .build();
-
-            CodefResponseDTO finalDto = CodefResponseDTO.builder()
-                    .propertyInfo(info)
-                    .resOriGinalData(dataNode.path("resOriGinalData").asText())  // ✅ 수정
-                    .riskReport(report)
-                    .build();
-
-            System.out.println("▶ 최종 응답 구성 완료");
-            //return finalDto;
-            return registerAnalysisService.save(analysisDto);
-
-        } catch (Exception e) {
-            System.err.println("▶ 분석 중 예외 발생: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("등기부 분석 중 오류 발생", e);
-        }
-    }
+//    @Override
+//    public Long parseFinalResult(JsonNode root, Long pid, String userId, HouseInfoDTO houseInfo) {
+//
+//        System.out.println("▶ 분석 응답 수신 (전체 JSON):\n" + root.toPrettyString());
+//
+//        try {
+//            JsonNode dataNode = root.path("data");  // ✅ 핵심 변경
+//// 로그 추가
+//            System.out.println("▶ dataNode 구조 확인:");
+//            System.out.println(dataNode.toPrettyString());
+//
+//            System.out.println("▶ dataNode 필드 목록:");
+//            dataNode.fieldNames().forEachRemaining(f -> System.out.println(" - " + f));
+//
+//            // ───── 1. 기본 부동산 정보 추출 ─────
+//            System.out.println("▶ 1단계: 기본 필드 추출 시작");
+//
+//            JsonNode entries = dataNode.path("resRegisterEntriesList");
+//            if (entries == null || !entries.isArray() || entries.size() == 0) {
+//                throw new IllegalArgumentException("resRegisterEntriesList가 존재하지 않음");
+//            }
+//
+//            JsonNode entry = entries.get(0);
+//            String address = entry.path("resRealty").asText();
+//            String uniqueNo = entry.path("commUniqueNo").asText();
+//            String issueRaw = entry.path("resPublishDate").asText(); // 예: "20250521"
+//            String regOffice = entry.path("commCompetentRegistryOffice").asText();
+//
+//            System.out.println("  ↳ 주소: " + address);
+//            System.out.println("  ↳ 고유번호: " + uniqueNo);
+//            System.out.println("  ↳ 발급일자(raw): " + issueRaw);
+//            System.out.println("  ↳ 등기소: " + regOffice);
+//
+//// ───── 2. 날짜 파싱 ─────
+//            System.out.println("▶ 2단계: 발급일자 파싱");
+//            LocalDateTime issueDate;
+//
+//            if (issueRaw.matches("\\d{8}")) {
+//                // "yyyyMMdd" 형식
+//                issueDate = LocalDate.parse(issueRaw, DateTimeFormatter.ofPattern("yyyyMMdd")).atStartOfDay();
+//            } else if (issueRaw.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}")) {
+//                // "yyyy-MM-dd HH:mm:ss" 형식
+//                issueDate = LocalDateTime.parse(issueRaw, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+//            } else {
+//                throw new IllegalArgumentException("지원하지 않는 발급일자 형식: " + issueRaw);
+//            }
+//
+//            System.out.println("  ↳ 발급일자 파싱 완료: " + issueDate);
+//
+//            // ───── 3. 등기 내역 분석 ─────
+//            System.out.println("▶ 3단계: 등기 내역 분석 시작");
+//            JsonNode hisList = entry.path("resRegistrationHisList");
+//            String owner = extractOwnerFromLatestTransfer(hisList);
+//            if (hisList == null || !hisList.isArray()) {
+//                throw new IllegalArgumentException("resRegistrationHisList가 존재하지 않음");
+//            }
+//            System.out.println("  ↳ 등록 내역 수: " + hisList.size());
+//
+//            RegisterAnalyzer.Result r = RegisterAnalyzer.analyze(hisList, address);
+//            System.out.println("  ↳ 분석 완료 - 위험도: " + r.overallRisk);
+//            System.out.println("  ↳ 최대 채권액: " + r.maxClaim);
+//            System.out.println("  ↳ 보호 금액: " + r.protectedAmount);
+//
+//            // ───── 4. DB 저장용 DTO 생성 및 저장 ─────
+//            System.out.println("▶ 4단계: RegisterAnalysisDTO 생성 및 저장");
+//            RegisterAnalysisDTO analysisDto = RegisterAnalysisDTO.builder()
+//                    .pid(pid)
+//                    .owner(owner)
+//                    .userid(userId)
+//                    .issueDate(issueDate)
+//                    .riskLevel(r.overallRisk)
+//                    .riskKeywords(
+//                            r.riskDetails.stream().map(RiskDetail::getKeyword)
+//                                    .collect(Collectors.joining(", ")))
+//                    .mainWarnings(
+//                            r.riskDetails.stream()
+//                                    .map(d -> d.getTitle() + " - " + d.getDescription())  // ✅ 제목 + 설명 결합
+//                                    .collect(Collectors.joining(" / "))
+//                    )
+//                    .maxClaim(r.maxClaim)
+//                    .protectedAmount(r.protectedAmount)
+//                    .purpose(Purpose.valueOf(houseInfo.getPurpose()))
+//                    .transactionType(TransactionType.valueOf(houseInfo.getTransactionType()))
+//                    .price(houseInfo.getPrice())
+//                    .rentPrc(houseInfo.getRentPrc())
+//                    .exclusiveArea(houseInfo.getExclusiveArea())
+//                    .pdfBase64(dataNode.path("resOriGinalData").asText())  // ✅ 수정
+//                    .riskDetails(r.riskDetails)
+//                    .build();
+//
+//
+//            System.out.println("  ↳ DB 저장 완료");
+//
+//            // ───── 5. 클라이언트 응답 DTO 구성 ─────
+//            System.out.println("▶ 5단계: 응답 DTO 구성 시작");
+//
+//            CodefResponseDTO.PropertyBasicInfo info = CodefResponseDTO.PropertyBasicInfo.builder()
+//                    .resRealty(address)
+//                    .resUserNm(owner)
+//                    .commUniqueNo(uniqueNo)
+//                    .resPublishDate(issueRaw)
+//                    .commCompetentRegistryOffice(regOffice)
+//                    .build();
+//
+//            List<CodefResponseDTO.RiskDetail> detailDtos = r.riskDetails.stream()
+//                    .map(d -> CodefResponseDTO.RiskDetail.builder()
+//                            .category(d.getTitle())
+//                            .level(d.getLevel())
+//                            .description(d.getDescription())
+//                            .build())
+//                    .toList();
+//
+//            CodefResponseDTO.RiskReport report = CodefResponseDTO.RiskReport.builder()
+//                    .overallRisk(r.overallRisk)
+//                    .risks(detailDtos)
+//                    .build();
+//
+//            CodefResponseDTO finalDto = CodefResponseDTO.builder()
+//                    .propertyInfo(info)
+//                    .resOriGinalData(dataNode.path("resOriGinalData").asText())  // ✅ 수정
+//                    .riskReport(report)
+//                    .build();
+//
+//            System.out.println("▶ 최종 응답 구성 완료");
+//            //return finalDto;
+//            return registerAnalysisService.save(analysisDto);
+//
+//        } catch (Exception e) {
+//            System.err.println("▶ 분석 중 예외 발생: " + e.getMessage());
+//            e.printStackTrace();
+//            throw new RuntimeException("등기부 분석 중 오류 발생", e);
+//        }
+//    }
 
     private String extractOwnerFromLatestTransfer(JsonNode hisList) {
         String fallback = "미상";

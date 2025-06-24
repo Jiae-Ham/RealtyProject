@@ -6,6 +6,7 @@ import com.Realty.RealtyWeb.enums.TransactionType;
 import com.Realty.RealtyWeb.services.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,7 +24,11 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -41,6 +46,7 @@ public class HouseBoardController {
     private final CodefRegisterService codefRegisterService;
     private final HouseInfoService houseInfoService;
     private final RegisterAnalysisService registerAnalysisService;
+    private final RagClientService ragClientService;
 
     @PostMapping("/{pid}/analyze")
     public ResponseEntity<?> analyzeRegister(
@@ -102,21 +108,53 @@ public class HouseBoardController {
                         .isIdentityViewYN("0")
                         .originDataYN("1")
                         .warningSkipYN("0")
-                        .build();
+                        .build  ();
 
                 // ⑤ 2차 요청 → 최종 분석
                 JsonNode uniqueResponse = codefRegisterService.requestByUnique(uniqueDto);
-                Long id = codefRegisterService.parseFinalResult(uniqueResponse, pid, user.getUsername(), infoDTO);
-                RegisterAnalysisDTO analysisDTO = registerAnalysisService.getByIdAndUser(id, user.getUsername());
 
-                return ResponseEntity.ok(analysisDTO);
+// ✅ [추가] uniqueResponse를 JSON 파일로 저장
+                try {
+                    String tempDir = System.getProperty("java.io.tmpdir");
+                    String fileName = String.format("unique_response_%d_%d.json", pid, System.currentTimeMillis());
+                    Path filePath = Paths.get(tempDir, fileName);
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    objectMapper.writerWithDefaultPrettyPrinter().writeValue(filePath.toFile(), uniqueResponse);
+
+                    System.out.println("uniqueResponse 저장 위치: " + filePath.toAbsolutePath());
+                } catch (IOException ioe) {
+                    System.err.println("uniqueResponse 저장 중 오류 발생: " + ioe.getMessage());
+                }
+
+                String pdfBase64 = uniqueResponse.path("data").path("resOriGinalData").asText();
+
+                // RAG 실행
+                String ragAnswer = ragClientService.analyzeWithRag(uniqueResponse);
+
+                RegisterAnalysisDTO analysisDTO = RegisterAnalysisDTO.builder()
+                        .pid(pid)
+                        .userid(user.getUsername())
+                        .purpose(Purpose.valueOf(infoDTO.getPurpose()))
+                        .transactionType(TransactionType.valueOf(infoDTO.getTransactionType()))
+                        .price(infoDTO.getPrice())
+                        .rentPrc(infoDTO.getRentPrc())
+                        .exclusiveArea(infoDTO.getExclusiveArea())
+                        .pdfBase64(pdfBase64)
+                        .ragAnswer(ragAnswer)
+                        .build();
+
+
+                // ⑦ 분석 DTO에 LLM 결과 합산
+                Long id = registerAnalysisService.save(analysisDTO);
+                RegisterAnalysisDTO savedDto = registerAnalysisService.getByIdAndUser(id, user.getUsername());
+
+                return ResponseEntity.ok(savedDto);
+
             }
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("2차 인증이 필요하지 않은 요청입니다. 현재는 2차 인증만 지원됩니다.");
 
-            // ⑥ 2차 인증 불필요 → 바로 분석
-            Long id = codefRegisterService.parseFinalResult(response, pid, user.getUsername(), infoDTO);
-            RegisterAnalysisDTO analysisDTO = registerAnalysisService.getByIdAndUser(id, user.getUsername());
-
-            return ResponseEntity.ok(analysisDTO);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
@@ -182,6 +220,7 @@ public class HouseBoardController {
             @RequestParam(required = false) Integer minExclusiveArea, // 최소 전용 면적
             @RequestParam(required = false) Integer maxExclusiveArea, // 최대 전용 면적
             @RequestParam(required = false) Integer minParkingPerHouseholdCount, // 주차 대수
+            @RequestParam(required = false) String addrCode, // 지역코드
             @RequestParam(defaultValue = "0") int page,         // 페이지 번호 (기본값: 0)
             @RequestParam(defaultValue = "10") int size         // 페이지 크기 (기본값: 10)
     ) {
@@ -195,6 +234,7 @@ public class HouseBoardController {
                 .minExclusiveArea(minExclusiveArea)
                 .maxExclusiveArea(maxExclusiveArea)
                 .minParkingPerHouseholdCount(minParkingPerHouseholdCount)
+                .addrCode(addrCode)
                 .build();
 
         Pageable pageable = PageRequest.of(page, size);

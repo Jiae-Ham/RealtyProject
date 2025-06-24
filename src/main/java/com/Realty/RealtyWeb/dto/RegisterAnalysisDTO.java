@@ -6,6 +6,8 @@ import com.Realty.RealtyWeb.enums.RiskLevel;
 import com.Realty.RealtyWeb.enums.TransactionType;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,11 +15,14 @@ import java.util.List;
 
 @Data
 @Builder
+@Setter
+@Getter
 public class RegisterAnalysisDTO {
     private Long id;
     private Long pid;
     private String userid;
 
+    /*
     private String owner;
     private LocalDateTime issueDate;
 
@@ -27,6 +32,8 @@ public class RegisterAnalysisDTO {
 
     private BigDecimal maxClaim;
     private BigDecimal protectedAmount;
+    */
+    private String ragAnswer;  // LLM 분석 결과 전체 문장 저장
 
     private Purpose purpose;
     private TransactionType transactionType;
@@ -45,13 +52,7 @@ public class RegisterAnalysisDTO {
                 .id(dto.getId())
                 .userid(dto.getUserid())
                 .pid(dto.getPid())
-                .owner(dto.getOwner())
-                .issue_date(dto.getIssueDate())
-                .risk_level(RiskLevel.valueOf(dto.getRiskLevel()))
-                .risk_keywords(dto.getRiskKeywords())
-                .main_warnings(dto.getMainWarnings())
-                .max_claim(dto.getMaxClaim())
-                .protected_amount(dto.getProtectedAmount())
+                .ragAnswer(dto.getRagAnswer())
                 .purpose(Purpose.valueOf(dto.getPurpose().toString()))
                 .transactionType(TransactionType.valueOf(dto.getTransactionType().toString()))
                 .price(dto.getPrice())
@@ -67,13 +68,7 @@ public class RegisterAnalysisDTO {
                 .id(entity.getId())
                 .userid(entity.getUserid())
                 .pid(entity.getPid())
-                .owner(entity.getOwner())
-                .issueDate(entity.getIssue_date())
-                .riskLevel(entity.getRisk_level().toString())
-                .riskKeywords(entity.getRisk_keywords())
-                .mainWarnings(entity.getMain_warnings())
-                .maxClaim(entity.getMax_claim())
-                .protectedAmount(entity.getProtected_amount())
+                .ragAnswer(entity.getRagAnswer())
                 .purpose(Purpose.valueOf(entity.getPurpose().toString()))
                 .transactionType(TransactionType.valueOf(entity.getTransactionType().toString()))
                 .price(entity.getPrice())
